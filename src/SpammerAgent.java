@@ -14,7 +14,7 @@ import jade.util.Logger;
  * Spammer Agent (SA). Sends N messages of size M to all MessageConsumingServices's when it receives
  * a START message from ExperimentMasterAgent.
  * Run:
- * java jade.Boot -container SpammerAgent(N, M)
+ * java jade.Boot -container SpammerAgent:SpammerAgent(N, M)
  * - N: number of messages.
  * - M: size of each message.
  */
@@ -100,7 +100,7 @@ public class SpammerAgent extends Agent {
                 }
             } catch (Exception e)
             {
-
+            
             }
 
             String content = "";
