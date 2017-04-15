@@ -20,6 +20,7 @@ import jade.util.Logger;
  */
 public class ExperimentMasterAgent extends Agent {
 
+    private static final long serialVersionUID = 570376489866952222L;
     public final static String DONE = "done";
     public final static String START = "start";
 
@@ -32,6 +33,7 @@ public class ExperimentMasterAgent extends Agent {
     @Override
     protected void setup() {
         addBehaviour(new OneShotBehaviour(this) {
+            private static final long serialVersionUID = 1582761767744710850L;
 
             @Override
             public void action() {
@@ -62,8 +64,8 @@ public class ExperimentMasterAgent extends Agent {
                 }
                 // Send START message to all SA's
                 ACLMessage startMsg = new ACLMessage(ACLMessage.REQUEST);
-                for (int i = 0; i < SpammerAgents.length; ++i) {
-                    startMsg.addReceiver(SpammerAgents[i]);
+                for (AID SpammerAgent : SpammerAgents) {
+                    startMsg.addReceiver(SpammerAgent);
                 }
                 startMsg.setContent(ExperimentMasterAgent.START);
                 myAgent.send(startMsg);
@@ -82,7 +84,8 @@ public class ExperimentMasterAgent extends Agent {
 
     private class ListenDoneMessagesBehaviour extends Behaviour {
 
-
+        private static final long serialVersionUID = 4075092804919487501L;
+        /** Number of MCA's that have finished */
         private int done;
 
         public ListenDoneMessagesBehaviour() {

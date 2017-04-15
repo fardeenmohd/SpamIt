@@ -17,12 +17,13 @@ import java.util.Map;
  * SpammerAgent's. When all messages have been processed, it sends message DONE to the
  * ExperimentMasterAgent. It knows how many messages from each SA should receive.
  * Run:
- * java jade.Boot -container MCAx:MessageConsumerAgent(N)
+ * java jade.Boot -container MessageConsumerAgentx:MessageConsumerAgent(N)
  * - N: number of messages to receive from each SpammerAgent.
  * Note: Spammer Agents (SA's) must be running before run MessageConsumerAgent's.
  */
 public class MessageConsumingAgent extends Agent {
 
+    private static final long serialVersionUID = 9085335745014921813L;
     private int numberOfMessages;
 
     private int numberOfSpammerAgents;
@@ -68,6 +69,7 @@ public class MessageConsumingAgent extends Agent {
      */
     private class MessageConsumingBehaviour extends Behaviour {
 
+        private static final long serialVersionUID = -5860119910249641199L;
         /** SA -> nº of msg received by it */
         private Map<String, Integer> received; //
 

@@ -20,6 +20,7 @@ import jade.util.Logger;
  */
 public class SpammerAgent extends Agent {
 
+    private static final long serialVersionUID = -3669628420932251804L;
     public final static String LANGUAGE = "spam";
     private int numberOfMessages ;
     private int sizeOfEachMessage;
@@ -54,6 +55,7 @@ public class SpammerAgent extends Agent {
 
         addBehaviour(new SimpleBehaviour(this) {
 
+            private static final long serialVersionUID = -1344483830624564835L;
             private boolean start = false;
 
             @Override
@@ -81,6 +83,8 @@ public class SpammerAgent extends Agent {
 
     private class SpammerBehaviour extends OneShotBehaviour{
 
+        private static final long serialVersionUID = -8492387448755961987L;
+        /** List of known Message Consuming Agents (MCA) */
         private AID[] MCAs;
 
         @Override
