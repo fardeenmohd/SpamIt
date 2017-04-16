@@ -63,7 +63,7 @@ public class MessageConsumingAgent extends Agent {
             DFAgentDescription[] result = DFService.search(this, dfd);
             numberOfSpammerAgents = result.length;
         } catch (FIPAException e) {
-            logger.log(Logger.SEVERE, "Cannot get SA's", e);
+            logger.log(Logger.SEVERE, "Cannot get SpammerAgents", e);
         }
         // Add the behaviour consuming spam messages
         addBehaviour(new MessageConsumingBehaviour());
@@ -118,7 +118,7 @@ public class MessageConsumingAgent extends Agent {
             }
             // Send DONE message to EMA
             ACLMessage doneMsg = new ACLMessage(ACLMessage.INFORM);
-            doneMsg.addReceiver(new AID("EMA", AID.ISLOCALNAME));
+            doneMsg.addReceiver(new AID("ExperimentMasterAgent", AID.ISLOCALNAME));
             doneMsg.setContent(ExperimentMasterAgent.DONE);
             myAgent.send(doneMsg);
             return true;

@@ -67,7 +67,7 @@ public class SpammerAgent extends Agent {
 
             @Override
             public void action() {
-                MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchSender(new AID("ExpirementMasterAgent", AID.ISLOCALNAME)),
+                MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchSender(new AID("ExperimentMasterAgent", AID.ISLOCALNAME)),
                         MessageTemplate.MatchContent(ExperimentMasterAgent.START));
                 ACLMessage msg = myAgent.receive(mt);
                 if (msg != null) {
