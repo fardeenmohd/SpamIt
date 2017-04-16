@@ -23,6 +23,7 @@ import java.util.Map;
  */
 public class MessageConsumingAgent extends Agent {
 
+    private final Logger logger = Logger.getMyLogger(getClass().getName());
     private static final long serialVersionUID = 9085335745014921813L;
     private int numberOfMessages;
 
@@ -34,8 +35,11 @@ public class MessageConsumingAgent extends Agent {
         Object[] args = getArguments();
         if (args != null && args.length == 1) {
             numberOfMessages = Integer.parseInt((String) args[0]);
+            logger.log(Logger.INFO, "Agent " + getLocalName() + " - Target: " + numberOfMessages + " msg");
         } else {
             numberOfMessages = 1;
+            logger.log(Logger.INFO, "Agent " + getLocalName() + " - Target: " + numberOfMessages + " msg");
+
         }
         // Register the message consuming service in the yellow pages
         ServiceDescription sd = new ServiceDescription();
@@ -47,6 +51,7 @@ public class MessageConsumingAgent extends Agent {
         try {
             DFService.register(this, dfd);
         } catch (FIPAException e) {
+            logger.log(Logger.SEVERE, "Agent " + getLocalName() + " - Cannot register with DF", e);
             doDelete();
         }
         // Get number of Spamer Agents (SA)
@@ -58,6 +63,7 @@ public class MessageConsumingAgent extends Agent {
             DFAgentDescription[] result = DFService.search(this, dfd);
             numberOfSpammerAgents = result.length;
         } catch (FIPAException e) {
+            logger.log(Logger.SEVERE, "Cannot get SA's", e);
         }
         // Add the behaviour consuming spam messages
         addBehaviour(new MessageConsumingBehaviour());
@@ -73,7 +79,7 @@ public class MessageConsumingAgent extends Agent {
         /** SA -> nº of msg received by it */
         private Map<String, Integer> received; //
 
-        public MessageConsumingBehaviour() {
+        MessageConsumingBehaviour() {
             super();
             this.received = new HashMap<>(numberOfSpammerAgents);
         }
@@ -85,6 +91,7 @@ public class MessageConsumingAgent extends Agent {
                     MessageTemplate.MatchLanguage(SpammerAgent.LANGUAGE));
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {
+                logger.log(Logger.INFO, "Agent " + getLocalName() + " - Message processed: " + msg.getContent());
                 // Update register of received messages
                 String sender = msg.getSender().getName();
                 if (received.containsKey(sender)) {

@@ -10,6 +10,8 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.util.Logger;
 
+import java.util.Random;
+
 /**
  * Spammer Agent (SA). Sends N messages of size M to all MessageConsumingServices's when it receives
  * a START message from ExperimentMasterAgent.
@@ -20,8 +22,10 @@ import jade.util.Logger;
  */
 public class SpammerAgent extends Agent {
 
+    private final Logger logger = Logger.getMyLogger(getClass().getName());
     private static final long serialVersionUID = -3669628420932251804L;
-    public final static String LANGUAGE = "spam";
+    final static String LANGUAGE = "spam";
+
     private int numberOfMessages ;
     private int sizeOfEachMessage;
 
@@ -33,11 +37,13 @@ public class SpammerAgent extends Agent {
         if (args != null && args.length == 2) {
             numberOfMessages = Integer.parseInt((String) args[0]);
             sizeOfEachMessage = Integer.parseInt((String) args[1]);
+            logger.log(Logger.INFO, "Agent " + getLocalName() + " - Target: " + numberOfMessages + " msg / " + sizeOfEachMessage + " size");
 
         } else {
 
             numberOfMessages = 1;
             sizeOfEachMessage = 3;
+            logger.log(Logger.INFO, "Agent " + getLocalName() + " - Target: " + numberOfMessages + " msg / " + sizeOfEachMessage + " size");
 
         }
 
@@ -50,6 +56,7 @@ public class SpammerAgent extends Agent {
         try {
             DFService.register(this, dfd);
         } catch (FIPAException e) {
+            logger.log(Logger.SEVERE, "Agent " + getLocalName() + " - Cannot register with DF", e);
             doDelete();
         }
 
@@ -97,19 +104,20 @@ public class SpammerAgent extends Agent {
 
             try {
                 DFAgentDescription[] result = DFService.search(myAgent, dfd);
-
+                logger.log(Logger.INFO, "Found " + result.length + " MCA's");
                 MCAs = new AID[result.length];
                 for (int i = 0; i < result.length; ++i) {
                     MCAs[i] = result[i].getName();
                 }
-            } catch (Exception e)
+            } catch (FIPAException e)
             {
-            
+                logger.log(Logger.SEVERE, "Cannot get MCA's", e);
             }
 
             String content = "";
             for (int i = 0; i < sizeOfEachMessage; i++) {
-                content += "A";
+                Random r = new Random();
+                content += (char)(r.nextInt(26) + 'a');
             }
 
             ACLMessage msg = new ACLMessage(ACLMessage.INFORM);

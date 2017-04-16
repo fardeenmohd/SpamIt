@@ -20,9 +20,10 @@ import jade.util.Logger;
  */
 public class ExperimentMasterAgent extends Agent {
 
+    private final Logger logger = Logger.getMyLogger(getClass().getName());
     private static final long serialVersionUID = 570376489866952222L;
-    public final static String DONE = "done";
-    public final static String START = "start";
+    final static String DONE = "done";
+    final static String START = "start";
 
     private AID[] SpammerAgents;
 
@@ -44,11 +45,13 @@ public class ExperimentMasterAgent extends Agent {
                 dfd.addServices(sd);
                 try {
                     DFAgentDescription[] result = DFService.search(myAgent, dfd);
+                    logger.log(Logger.INFO, "Found " + result.length + " SpammerAgents");
                     SpammerAgents = new AID[result.length];
                     for (int i = 0; i < result.length; ++i) {
                         SpammerAgents[i] = result[i].getName();
                     }
                 } catch (FIPAException e) {
+                    logger.log(Logger.SEVERE, "Cannot get SA's", e);
 
                 }
                 // Get number of Message Consuming Agents (MCA)
@@ -60,7 +63,7 @@ public class ExperimentMasterAgent extends Agent {
                     DFAgentDescription[] result = DFService.search(myAgent, dfd);
                     numberOfMessageConsumingAgents = result.length;
                 } catch (FIPAException e) {
-
+                    logger.log(Logger.SEVERE, "Cannot get MessageConsumingAgents", e);
                 }
                 // Send START message to all SA's
                 ACLMessage startMsg = new ACLMessage(ACLMessage.REQUEST);
@@ -88,7 +91,7 @@ public class ExperimentMasterAgent extends Agent {
         /** Number of MCA's that have finished */
         private int done;
 
-        public ListenDoneMessagesBehaviour() {
+        ListenDoneMessagesBehaviour() {
             super();
             done = 0;
         }
