@@ -12,6 +12,9 @@ Command line argument to run all the agents
 -----MCA-----
 -container -host localhost -port 420 -agents "MessageConsumingAgent:MessageConsumingAgent(50)"
 
+-----MCAP-----
+-container -host localhost -port 420 -agents "MessageConsumingAgent:MessageConsumingAgentPriority(50,SpammerAgentx)"
+
 ------EMA------
 -container -host localhost -port 420 -agents "ExperimentMasterAgent:ExperimentMasterAgent()"
 
