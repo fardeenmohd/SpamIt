@@ -77,8 +77,12 @@ public class MessageConsumingAgent extends Agent {
 
         private static final long serialVersionUID = -5860119910249641199L;
         /** SA -> nº of msg received by it */
+        private static final String SEPERATOR = "_";
         private Map<String, Integer> received; //
         private int numOfMessagesProcessed = 0;
+        private double shortestMsgProcessTime = Double.MAX_VALUE;
+        private double longestMsgProcessTime = Double.MIN_VALUE;
+
         MessageConsumingBehaviour() {
             super();
             this.received = new HashMap<>(numberOfSpammerAgents);
@@ -89,6 +93,8 @@ public class MessageConsumingAgent extends Agent {
             // Receive spam messages
             MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.INFORM),
                     MessageTemplate.MatchLanguage(SpammerAgent.LANGUAGE));
+
+            double timeToProcessMessageInitial = System.nanoTime();
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {
                 logger.log(Logger.INFO, "Agent " + getLocalName() + " - Message processed: " + msg.getContent());
@@ -97,9 +103,18 @@ public class MessageConsumingAgent extends Agent {
                 if (received.containsKey(sender)) {
                     received.put(sender, received.get(sender) + 1);
                     numOfMessagesProcessed++;
+
                 } else {
                     received.put(sender, 1);
                 }
+                double timeToProcessMsg = (double)System.nanoTime() - timeToProcessMessageInitial;
+                if(timeToProcessMsg < shortestMsgProcessTime){
+                    shortestMsgProcessTime = timeToProcessMsg;
+                }
+                if(timeToProcessMsg > longestMsgProcessTime){
+                    longestMsgProcessTime = timeToProcessMsg;
+                }
+                timeToProcessMessageInitial = System.nanoTime();
             } else {
                 block();
             }
@@ -120,7 +135,11 @@ public class MessageConsumingAgent extends Agent {
             // Send DONE message to EMA
             ACLMessage doneMsg = new ACLMessage(ACLMessage.INFORM);
             doneMsg.addReceiver(new AID("ExperimentMasterAgent", AID.ISLOCALNAME));
-            doneMsg.setContent(ExperimentMasterAgent.DONE + "_" + numOfMessagesProcessed);
+            // Convert nanoseconds to milliseconds by dividing by a million
+            shortestMsgProcessTime /= 1000000;
+            longestMsgProcessTime /= 1000000;
+            // Encode all statistics of message processing in done message
+            doneMsg.setContent(ExperimentMasterAgent.DONE + SEPERATOR + numOfMessagesProcessed + SEPERATOR + shortestMsgProcessTime + SEPERATOR + longestMsgProcessTime);
             myAgent.send(doneMsg);
             return true;
         }

@@ -29,7 +29,7 @@ public class ExperimentMasterAgent extends Agent {
 
     private int numberOfMessageConsumingAgents;
 
-    private long timeInitial;
+    private double timeInitial;
 
     @Override
     protected void setup() {
@@ -73,7 +73,7 @@ public class ExperimentMasterAgent extends Agent {
                 startMsg.setContent(ExperimentMasterAgent.START);
                 myAgent.send(startMsg);
                 // Start timer
-                timeInitial = System.currentTimeMillis();
+                timeInitial = System.nanoTime();
                 // Add the behaviour listen to done messages
                 addBehaviour(new ListenDoneMessagesBehaviour());
             }
@@ -90,7 +90,9 @@ public class ExperimentMasterAgent extends Agent {
         private static final long serialVersionUID = 4075092804919487501L;
         /** Number of MCA's that have finished */
         private int done;
-        private int numOfMessagesConsumedByMCAs = 0;
+        private int numOfMessagesConsumedByAllMCAs = 0;
+        private double shortestSpamMsgProcessTime = Double.MAX_VALUE;
+        private double longestSpamMsgProcessTime = Double.MIN_VALUE;
         ListenDoneMessagesBehaviour() {
             super();
             done = 0;
@@ -101,11 +103,24 @@ public class ExperimentMasterAgent extends Agent {
             // Receive DONE messages
             MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
             ACLMessage msg = myAgent.receive(mt);
-            int numOfMessagesProcessedByMCA = 0;
+            int numOfMessagesProcessedByOneMCA = 0;
+            double shortestMessageProcessTimeForOneMCA = 0.0;
+            double longestMessageProcessTimeForOneMCA = 0.0;
             if (msg != null && msg.getContent().contains(ExperimentMasterAgent.DONE)) {
                 ++done;
-                numOfMessagesProcessedByMCA = Integer.parseInt(msg.getContent().split("_")[1]);
-                numOfMessagesConsumedByMCAs += numOfMessagesProcessedByMCA;
+                // Get scenario statistics
+                String[] statistics = msg.getContent().split("_");
+                numOfMessagesProcessedByOneMCA = Integer.parseInt(statistics[1]);
+                shortestMessageProcessTimeForOneMCA = Double.parseDouble(statistics[2]);
+                longestMessageProcessTimeForOneMCA = Double.parseDouble(statistics[3]);
+                // Now we find the shortest/longest time comparing to other MCAs
+                if(shortestMessageProcessTimeForOneMCA < shortestSpamMsgProcessTime){
+                    shortestSpamMsgProcessTime = shortestMessageProcessTimeForOneMCA;
+                }
+                if(longestMessageProcessTimeForOneMCA > longestSpamMsgProcessTime){
+                    longestSpamMsgProcessTime = longestMessageProcessTimeForOneMCA;
+                }
+                numOfMessagesConsumedByAllMCAs += numOfMessagesProcessedByOneMCA;
             } else {
                 block();
             }
@@ -120,9 +135,12 @@ public class ExperimentMasterAgent extends Agent {
         @Override
         public int onEnd() {
             // Print execution time
-            long timeFinished = System.currentTimeMillis() - timeInitial;
-            System.out.println("Execution time: " + timeFinished + "ms");
-            System.out.println("Num of Messages: " + numOfMessagesConsumedByMCAs + "Average time to process 1 spam msg: " + (double)timeFinished / numOfMessagesConsumedByMCAs + "ms");
+            double timeFinished = System.nanoTime() - timeInitial;
+            double timeFinishedMilliseconds = timeFinished / 1000000;
+            System.out.println("Execution time: " + timeFinishedMilliseconds + "ms");
+            System.out.println("Num of Messages: " + numOfMessagesConsumedByAllMCAs + " Average time to process 1 spam msg: " + timeFinishedMilliseconds / numOfMessagesConsumedByAllMCAs + "ms");
+            System.out.println("Shortest time to process 1 spam msg: " + shortestSpamMsgProcessTime + "ms");
+            System.out.println("Longest time to process 1 spam msg: " + longestSpamMsgProcessTime + "ms");
             return 0;
         }
     }
