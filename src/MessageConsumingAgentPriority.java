@@ -85,22 +85,37 @@ public class MessageConsumingAgentPriority extends Agent {
     private class MessageConsumingBehaviour extends Behaviour {
 
         private static final long serialVersionUID = -5860119910249641199L;
+        private static final String SEPERATOR = "_";
         /** SA -> nº of msg received by it */
         private Map<String, Integer> received;
         /** Messages to read */
         private Queue<ACLMessage> toRead;
-
+        private int numOfMessagesProcessed = 0;
+        private double shortestMsgProcessTime = Double.MAX_VALUE;
+        private double longestMsgProcessTime = Double.MIN_VALUE;
         MessageConsumingBehaviour() {
             super();
             this.received = new HashMap<>(numberOfSpammerAgents);
             this.toRead = new LinkedList<>();
         }
 
+        /**Updates statistics by incrementing msg count and finding shortest and longest time and so on**/
+        public void updateStatistics(double initialProcessTime){
+            double timeToProcessMsg = (double)System.nanoTime() - initialProcessTime;
+            if(timeToProcessMsg < shortestMsgProcessTime){
+                shortestMsgProcessTime = timeToProcessMsg;
+            }
+            if(timeToProcessMsg > longestMsgProcessTime){
+                longestMsgProcessTime = timeToProcessMsg;
+            }
+            numOfMessagesProcessed++;
+        }
         @Override
         public void action() {
             // Receive spam messages
             MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.INFORM),
                     MessageTemplate.MatchLanguage(SpammerAgent.LANGUAGE));
+            double timeToProcessMessageInitial = System.nanoTime();
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {
                 // Check if it is from the priority SA
@@ -111,10 +126,14 @@ public class MessageConsumingAgentPriority extends Agent {
                     // Put the message in the queue
                     toRead.add(msg);
                 }
+                updateStatistics(timeToProcessMessageInitial);
+                timeToProcessMessageInitial = System.nanoTime();
             } else if(toRead.size() > 0) {
                 // Consume message from the FIFO queue
                 msg = toRead.poll();
                 processMessage(msg);
+                updateStatistics(timeToProcessMessageInitial);
+                timeToProcessMessageInitial = System.nanoTime();
             } else {
                 block();
             }
@@ -155,7 +174,7 @@ public class MessageConsumingAgentPriority extends Agent {
             // Send DONE message to EMA
             ACLMessage doneMsg = new ACLMessage(ACLMessage.INFORM);
             doneMsg.addReceiver(new AID("ExperimentMasterAgent", AID.ISLOCALNAME));
-            doneMsg.setContent(ExperimentMasterAgent.DONE);
+            doneMsg.setContent(ExperimentMasterAgent.DONE + SEPERATOR + numOfMessagesProcessed + SEPERATOR + shortestMsgProcessTime + SEPERATOR + longestMsgProcessTime);
             myAgent.send(doneMsg);
             return true;
         }

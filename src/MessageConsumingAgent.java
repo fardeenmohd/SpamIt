@@ -87,7 +87,16 @@ public class MessageConsumingAgent extends Agent {
             super();
             this.received = new HashMap<>(numberOfSpammerAgents);
         }
-
+        public void updateStatistics(double initialProcessTime){
+            double timeToProcessMsg = (double)System.nanoTime() - initialProcessTime;
+            if(timeToProcessMsg < shortestMsgProcessTime){
+                shortestMsgProcessTime = timeToProcessMsg;
+            }
+            if(timeToProcessMsg > longestMsgProcessTime){
+                longestMsgProcessTime = timeToProcessMsg;
+            }
+            numOfMessagesProcessed++;
+        }
         @Override
         public void action() {
             // Receive spam messages
@@ -102,18 +111,12 @@ public class MessageConsumingAgent extends Agent {
                 String sender = msg.getSender().getName();
                 if (received.containsKey(sender)) {
                     received.put(sender, received.get(sender) + 1);
-                    numOfMessagesProcessed++;
+
 
                 } else {
                     received.put(sender, 1);
                 }
-                double timeToProcessMsg = (double)System.nanoTime() - timeToProcessMessageInitial;
-                if(timeToProcessMsg < shortestMsgProcessTime){
-                    shortestMsgProcessTime = timeToProcessMsg;
-                }
-                if(timeToProcessMsg > longestMsgProcessTime){
-                    longestMsgProcessTime = timeToProcessMsg;
-                }
+                updateStatistics(timeToProcessMessageInitial);
                 timeToProcessMessageInitial = System.nanoTime();
             } else {
                 block();
