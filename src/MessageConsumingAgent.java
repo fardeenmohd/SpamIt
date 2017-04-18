@@ -78,7 +78,7 @@ public class MessageConsumingAgent extends Agent {
         private static final long serialVersionUID = -5860119910249641199L;
         /** SA -> nº of msg received by it */
         private Map<String, Integer> received; //
-
+        private int numOfMessagesProcessed = 0;
         MessageConsumingBehaviour() {
             super();
             this.received = new HashMap<>(numberOfSpammerAgents);
@@ -96,6 +96,7 @@ public class MessageConsumingAgent extends Agent {
                 String sender = msg.getSender().getName();
                 if (received.containsKey(sender)) {
                     received.put(sender, received.get(sender) + 1);
+                    numOfMessagesProcessed++;
                 } else {
                     received.put(sender, 1);
                 }
@@ -119,7 +120,7 @@ public class MessageConsumingAgent extends Agent {
             // Send DONE message to EMA
             ACLMessage doneMsg = new ACLMessage(ACLMessage.INFORM);
             doneMsg.addReceiver(new AID("ExperimentMasterAgent", AID.ISLOCALNAME));
-            doneMsg.setContent(ExperimentMasterAgent.DONE);
+            doneMsg.setContent(ExperimentMasterAgent.DONE + "_" + numOfMessagesProcessed);
             myAgent.send(doneMsg);
             return true;
         }

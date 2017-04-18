@@ -90,7 +90,7 @@ public class ExperimentMasterAgent extends Agent {
         private static final long serialVersionUID = 4075092804919487501L;
         /** Number of MCA's that have finished */
         private int done;
-
+        private int numOfMessagesConsumedByMCAs = 0;
         ListenDoneMessagesBehaviour() {
             super();
             done = 0;
@@ -99,11 +99,13 @@ public class ExperimentMasterAgent extends Agent {
         @Override
         public void action() {
             // Receive DONE messages
-            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.INFORM),
-                    MessageTemplate.MatchContent(ExperimentMasterAgent.DONE));
+            MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
             ACLMessage msg = myAgent.receive(mt);
-            if (msg != null) {
+            int numOfMessagesProcessedByMCA = 0;
+            if (msg != null && msg.getContent().contains(ExperimentMasterAgent.DONE)) {
                 ++done;
+                numOfMessagesProcessedByMCA = Integer.parseInt(msg.getContent().split("_")[1]);
+                numOfMessagesConsumedByMCAs += numOfMessagesProcessedByMCA;
             } else {
                 block();
             }
@@ -120,6 +122,7 @@ public class ExperimentMasterAgent extends Agent {
             // Print execution time
             long timeFinished = System.currentTimeMillis() - timeInitial;
             System.out.println("Execution time: " + timeFinished + "ms");
+            System.out.println("Num of Messages: " + numOfMessagesConsumedByMCAs + "Average time to process 1 spam msg: " + (double)timeFinished / numOfMessagesConsumedByMCAs + "ms");
             return 0;
         }
     }
