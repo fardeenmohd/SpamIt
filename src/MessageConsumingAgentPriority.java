@@ -183,6 +183,7 @@ public class MessageConsumingAgentPriority extends Agent {
             longestMsgProcessTime /= 1000000;
             // Encode all statistics of message processing in done message
             doneMsg.setContent(ExperimentMasterAgent.DONE + SEPERATOR + numOfMessagesProcessed + SEPERATOR + shortestMsgProcessTime + SEPERATOR + longestMsgProcessTime);
+            logger.log(logger.INFO, "Sending statistics, longestTime: " + longestMsgProcessTime + " shortestTime: " + shortestMsgProcessTime + " NumOfMessagesProcessed: " + numOfMessagesProcessed);
             myAgent.send(doneMsg);
             return true;
         }
