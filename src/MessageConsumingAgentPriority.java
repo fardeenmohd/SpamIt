@@ -52,8 +52,8 @@ public class MessageConsumingAgentPriority extends Agent {
         }
         // Register the message consuming service in the yellow pages
         ServiceDescription sd = new ServiceDescription();
-        sd.setType("MessageConsumerAgent");
-        sd.setName("MessageConsumerAgentService");
+        sd.setType("MessageConsumingAgent");
+        sd.setName("MessageConsumingAgentService");
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
         dfd.addServices(sd);
