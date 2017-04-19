@@ -120,14 +120,17 @@ public class MessageConsumingAgentPriority extends Agent {
             if (msg != null) {
                 // Check if it is from the priority SA
                 if(msg.getSender().getName().equals(prioritySpammerAgent)){
+                    logger.log(logger.INFO, "Received msg from priority spammer agent with name: "
+                            + msg.getSender().getName() + " and content: " + msg.getContent());
                     // Process message
                     processMessage(msg);
+                    updateStatistics(timeToProcessMessageInitial);
+                    timeToProcessMessageInitial = System.nanoTime();
                 } else {
                     // Put the message in the queue
                     toRead.add(msg);
                 }
-                updateStatistics(timeToProcessMessageInitial);
-                timeToProcessMessageInitial = System.nanoTime();
+
             } else if(toRead.size() > 0) {
                 // Consume message from the FIFO queue
                 msg = toRead.poll();
@@ -137,6 +140,7 @@ public class MessageConsumingAgentPriority extends Agent {
             } else {
                 block();
             }
+
         }
 
         /**
@@ -174,6 +178,10 @@ public class MessageConsumingAgentPriority extends Agent {
             // Send DONE message to EMA
             ACLMessage doneMsg = new ACLMessage(ACLMessage.INFORM);
             doneMsg.addReceiver(new AID("ExperimentMasterAgent", AID.ISLOCALNAME));
+            // Convert nanoseconds to milliseconds by dividing by a million
+            shortestMsgProcessTime /= 1000000;
+            longestMsgProcessTime /= 1000000;
+            // Encode all statistics of message processing in done message
             doneMsg.setContent(ExperimentMasterAgent.DONE + SEPERATOR + numOfMessagesProcessed + SEPERATOR + shortestMsgProcessTime + SEPERATOR + longestMsgProcessTime);
             myAgent.send(doneMsg);
             return true;
